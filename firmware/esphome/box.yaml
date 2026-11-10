@@ -89,6 +89,16 @@ sensor:
     name: "RSSI"
     update_interval: 60s
 
+# --- volitelne: ENS160+AHT21 VOC/AQI modul (+130 Kc, native od ESPHome 2023.11) ---
+# sensor:
+#   - platform: ens160_i2c
+#     eco2:   {name: "eCO2 odhad"}
+#     tvoc:   {name: "TVOC"}
+#     aqi:    {name: "AQI"}
+#     compensation:
+#       temperature: id: temp_meas
+#       humidity: id: hum_meas
+
 number:
   - platform: template
     name: "Cilova teplota"
