@@ -12,7 +12,9 @@ V centrální krabici (3D tisk nebo DIN krabička 200×120×75):
 ## GPIO pinout
 Kanály J1–J12 a přiřazení 12 GPIO: **canonical tabulka je `docs/setup-prirucka.md §3`** (tento dokument ji neopakuje, ať se nerozjíždějí).
 
-## Zapojení relé boardů (2× 8CH, optočleny, low-trigger)
+## Zapojení relé boardů (vlastněné 3× 8CH TONGLING JQC-3FF-S-Z, optočleny, low-trigger)
+
+> Na bench fotkách je žlutý jumper JD-VCC↔VCC nasazený a VCC napájená z Pi 5V s společnou GND — **takto to pro 3.3V logiku nepoužívat** (HIGH 3.3V na 5V opto vstupu může relé ani vypnout). Přepoj dle bodů 1–4.
 1. **ODŘEZAT jumper JD-VCC** (oddělit cívkovou větev od logiky).
 2. JD-VCC ← externí 5 V/3 A PSU `+`; JD-GND ← PSU `−` (strana cívek).
 3. VCC desky (logika) ← **3V3 Raspberry Pi** (sytí opto-LEDky ~2 mA/kanál). **GND Pi se s deskou nepojuje** — úplná galvanická izolace.

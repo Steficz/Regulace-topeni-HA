@@ -36,7 +36,7 @@ Verze: 12 místností (mapa `scripts/gen-zone.py → ROOMS`). Dvě varianty cent
 | J6 | 24 (pin 18) | | J12 | 25 (pin 22) |
 | GND | pin 6 nebo 9 → GND logiky relay boardu |
 
-- **Boardy: 2× Smart Electronics 8CH (nebo equivalent) — optočleny, jumper JD-VCC, IN nízkoaktivní (LOW = relé SEPNUTÉ).**
+- **Boardy: 3× 8CH TONGLING (vlastněné, JQC-3FF-S-Z 5V, optočleny, header GND/VCC/JD-VCC) — IN nízkoaktivní (LOW = relé SEPNUTÉ).**
 - Zapojení: **VCC desky ← 3V3 Pi** (sytí opto-LEDky ~2 mA/kanál), **IN ← GPIO dle tabulky**, **JD-VCC jumper ODŘEZAT**, JD-VCC ← externí 5 V/3 A PSU (cívky), JD-GND ← GND PSU; **GND Pi se s deskou NEPOJUJE** — úplná galvanická izolace.
 - HA: Integrace **GPIO** → 12× switch dle tabulky (entity `switch.vyt_j1…j12`), u každého zapnout **Inverted** (LOW=ON).
 - ⚠: GPIO 2/3 vyhrazeny I2C pro budoucí expanzi, 14/15 UART.

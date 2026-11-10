@@ -51,7 +51,7 @@ Zdroj mapy: `scripts/gen-zone.py` (proměnná `ROOMS`).
 |---|---|---|
 | Měřicí box | ESP32-C6, SHT40 (I2C), SCD40 (I2C), buck MP1584 24→5 V, pojistka 0.5 A | 12 |
 | Pohon ventilu | voskový, 24 V DC, NC, závit M30×1.5 | 12 |
-| Spínání | 2× 8CH relay board (optočleny, low-trigger, JD-VCC oddělen, cívky z 5 V/3 A PSU) | 2 |
+| Spínání | 3× 8CH relay board, TONGLING JQC-3FF-S-Z 5V (optočleny, low-trigger, JD-VCC oddělen, cívky z 5 V/3 A PSU) | 3 (24 kan.) |
 | Zdroj ventilů | 24 V / 5 A | 1 |
 | Řídicí unit | RPi 3, HA OS, NVMe | 1 |
 | Akter (varianta B) | ESP32 devkit | 1 |
