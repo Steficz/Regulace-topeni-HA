@@ -36,8 +36,9 @@ Verze: 12 místností (mapa `scripts/gen-zone.py → ROOMS`). Dvě varianty cent
 | J6 | 24 (pin 18) | | J12 | 25 (pin 22) |
 | GND | pin 6 nebo 9 → GND logiky relay boardu |
 
-- **Relay board: jumper JD-VCC ODŘEZAT.** Cívky (VCC/GND na straně JD) ← externí 5 V/3 A PSU. IN←GPIO, GND logiky ← GND Pi.
-- HA: Settings → Devices & Services → Add **GPIO** integraci → 12× switch dle tabulky (entity `switch.vyt_j1…j12`).
+- **Boardy: 2× Smart Electronics 8CH (nebo equivalent) — optočleny, jumper JD-VCC, IN nízkoaktivní (LOW = relé SEPNUTÉ).**
+- Zapojení: **VCC desky ← 3V3 Pi** (sytí opto-LEDky ~2 mA/kanál), **IN ← GPIO dle tabulky**, **JD-VCC jumper ODŘEZAT**, JD-VCC ← externí 5 V/3 A PSU (cívky), JD-GND ← GND PSU; **GND Pi se s deskou NEPOJUJE** — úplná galvanická izolace.
+- HA: Integrace **GPIO** → 12× switch dle tabulky (entity `switch.vyt_j1…j12`), u každého zapnout **Inverted** (LOW=ON).
 - ⚠: GPIO 2/3 vyhrazeny I2C pro budoucí expanzi, 14/15 UART.
 
 ## 4. Centrála varianta B — ESP32 akter (DOPORUČUJI)
@@ -51,8 +52,8 @@ Proč B oproti A na RPi 3 + NVMe:
 | monitoring | — | teplota/deska/heartbeat v ESPHome, OTA upgrade |
 | mínus | — | +200 Kč, +1 flash, +1 zařízení na Wi-Fi |
 1. V ESPHome add-onu: New device → import z repozitáře (nebo paste) `firmware/esphome/central-actor.yaml`, doplň `secrets.yaml` (wifi, mqtt user/pass), flash USB, pojmenuj `vyt-central`.
-2. GPIO→IN mapování dle hlavičky souboru (GPIO4=J1 … GPIO33=J12); relay board zapoj jako v A, ale logiku GND napoj na GND ESP32.
-3. `restore_mode: ALWAYS_OFF` — akter po výpadku startuje do bezpečna a boxy mu do 4 min řeknou pravdu.
+2. GPIO→IN mapování dle hlavičky souboru (GPIO4=J1 … GPIO33=J12); boardy zapojeny jako v A — VCC desky na **3V3 ESP32**, GND s deskou nepojuj.
+3. `restore_mode: ALWAYS_OFF` + `inverted: true` — akter startuje do bezpečna (GPIO HIGH = relé rozepnuto); boxy mu do 4 min řeknou pravdu.
 
 ## 5. Stěnový box ×12
 1. ESPHome add-on → copy `firmware/esphome/box.yaml` → `vyt-j1.yaml` … `vyt-j12.yaml` (přepis `substitutions`), u každého i2c piny dle desky, flash USB.

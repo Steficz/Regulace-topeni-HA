@@ -7,7 +7,7 @@ Systém room-by-room regulace radiátorového vytápění. Každá místnost má
 ```
 Stěnový box (×12)                      Centrála
 ESP32-C6 + SHT40 + SCD40               RPi 3: Home Assistant, Mosquitto, Tailscale
-buck 24→5 V (tenká linka)              + relay board 16CH
+buck 24→5 V (tenká linka)              + 2× 8CH relay board
 regulace: bang-bang, hystereze ±0.3/0.5 K,          ├── varianta A: GPIO Pi přímo
 mrazovka, min ON/OFF režimové doby             └── varianta B: ESP32 akter (doporučeno)
         │                                          │
@@ -51,7 +51,7 @@ Zdroj mapy: `scripts/gen-zone.py` (proměnná `ROOMS`).
 |---|---|---|
 | Měřicí box | ESP32-C6, SHT40 (I2C), SCD40 (I2C), buck MP1584 24→5 V, pojistka 0.5 A | 12 |
 | Pohon ventilu | voskový, 24 V DC, NC, závit M30×1.5 | 12 |
-| Spínání | relay board 16CH, optočlenový vstup, JD-VCC oddělen, cívky z 5 V/3 A PSU | 1 |
+| Spínání | 2× 8CH relay board (optočleny, low-trigger, JD-VCC oddělen, cívky z 5 V/3 A PSU) | 2 |
 | Zdroj ventilů | 24 V / 5 A | 1 |
 | Řídicí unit | RPi 3, HA OS, NVMe | 1 |
 | Akter (varianta B) | ESP32 devkit | 1 |

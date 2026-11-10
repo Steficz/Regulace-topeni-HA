@@ -1,13 +1,13 @@
 # ============================================================
 # Varianta B — centralni akter na ESP32 (AUTO-GENEROVANO
 # scripts/gen-central.py — source pravdy = PINS v nem)
-# ESP32 devkit v4 + ESPHome; 12x gpio switch -> IN relay boardu.
-# Vyhoda: pri restartu/rebootu HA (a) GPIO Pi nespadnou do inputu,
-# (b) topeni bezima dal; RPi je "mozna", ale ne elektricka cesta.
+# ESP32 devkit v4 + ESPHome; 12x gpio switch (INVERTED) -> IN relay boardu.
 #
-# Zapojeni: relay board JD-VCC ODREZAT; cevky z vlastniho 5V/3A PSU;
-# GND logiky relay boardu === GND ESP32 (spolecny zem, napr. přes USB
-# napajeci GND, nebo kabelem). INx <-> GPIO dle tabulky níže.
+# Zapojeni (Smart Electronics 8CH boardy, low-trigger, 2x8=16 kanalu):
+#   VCC desky      <- ESP32 3V3 (napaji opto-LEDky, ~2 mA/kanal)
+#   INx            <- GPIO dle tabulky; LOW = relé SEP (proto inverted)
+#   JD-VCC jumper  ODREZAT; JD-VCC <- externi 5V/3A PSU "+"; GND PSU <- JD-GND
+#   GND ESP32 se k desce NEPOJUVA — uplna galvanicka izolace optoclennem.
 # ============================================================
 substitutions:
   device_name: vyt-central
@@ -159,71 +159,71 @@ switch:
     name: "J1 ventil"
     id: v1
     pin: GPIO4
-    inverted: false
+    inverted: true
     restore_mode: ALWAYS_OFF
   - platform: gpio
     name: "J2 ventil"
     id: v2
     pin: GPIO16
-    inverted: false
+    inverted: true
     restore_mode: ALWAYS_OFF
   - platform: gpio
     name: "J3 ventil"
     id: v3
     pin: GPIO17
-    inverted: false
+    inverted: true
     restore_mode: ALWAYS_OFF
   - platform: gpio
     name: "J4 ventil"
     id: v4
     pin: GPIO18
-    inverted: false
+    inverted: true
     restore_mode: ALWAYS_OFF
   - platform: gpio
     name: "J5 ventil"
     id: v5
     pin: GPIO19
-    inverted: false
+    inverted: true
     restore_mode: ALWAYS_OFF
   - platform: gpio
     name: "J6 ventil"
     id: v6
     pin: GPIO21
-    inverted: false
+    inverted: true
     restore_mode: ALWAYS_OFF
   - platform: gpio
     name: "J7 ventil"
     id: v7
     pin: GPIO22
-    inverted: false
+    inverted: true
     restore_mode: ALWAYS_OFF
   - platform: gpio
     name: "J8 ventil"
     id: v8
     pin: GPIO23
-    inverted: false
+    inverted: true
     restore_mode: ALWAYS_OFF
   - platform: gpio
     name: "J9 ventil"
     id: v9
     pin: GPIO25
-    inverted: false
+    inverted: true
     restore_mode: ALWAYS_OFF
   - platform: gpio
     name: "J10 ventil"
     id: v10
     pin: GPIO27
-    inverted: false
+    inverted: true
     restore_mode: ALWAYS_OFF
   - platform: gpio
     name: "J11 ventil"
     id: v11
     pin: GPIO32
-    inverted: false
+    inverted: true
     restore_mode: ALWAYS_OFF
   - platform: gpio
     name: "J12 ventil"
     id: v12
     pin: GPIO33
-    inverted: false
+    inverted: true
     restore_mode: ALWAYS_OFF

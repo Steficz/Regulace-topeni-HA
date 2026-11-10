@@ -3,7 +3,7 @@
 Ceny orientační (listopad 2026), CZ e-shopy: GrandLine, GUDLIK, led-ex, DO-METRO, Alza (PSU); levnější cesta AliExpress (dodání 2–4 týdny).
 
 ## MVP — pilot 1 místnost („Můj pokoj")
-Použiješ: RPi 3 + NVMe 128 GB (máš) · 16CH relay board (máš) · testovací pohon 24V NC (máš).
+Použiješ: RPi 3 + NVMe 128 GB (máš) · 16relé board (máš; jinak 2× Smart Electronics 8CH, ~260 Kč/2 ks) · testovací pohon 24V NC (máš).
 
 | # | Položka | ks | ~Ks/ks | Kč | Kde |
 |---|---|---|---|---|---|
@@ -18,6 +18,7 @@ Použiješ: RPi 3 + NVMe 128 GB (máš) · 16CH relay board (máš) · testovac�
 | 9 | Dupont jumper wires, kabel, cín, drobné | — | — | 150 | CZ |
 | 10 | ESP32 classic devkit V4 (varianta B — akter) | 1 | 200 | 200 | Ali/CZ |
 | 11 | krabice 3D tisk (filament) | — | — | 50 | — |
+| 12 | 8CH relay board (pokud 16relé board není/-nevyhovuje) | 2 | 130 | 260 | Ali (Smart Electronics) |
 | | **MVP celkem** | | | **~2 440 Kč** | |
 
 MVP test: box běží, MQTT flow do relé, změříš dynamiku pohonu + RSSI. Rozhodnutí po pilotu: dotah signálu (2. AP?).

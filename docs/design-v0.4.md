@@ -8,7 +8,7 @@
 [stěnový box ×12]                [HA: RPi 3 + NVMe]                [výkonová část]
 ESP32-C6                         Home Assistant OS                 varianta A: GPIO Pi
 SHT40  (T/RH, I2C)        Wi-Fi  Mosquitto :1883                   varianta B: ESP32 akter
-SCD40  (CO2, I2C)      ─────────►Tailscale      ──MQTT────►         16CH relay board
+SCD40  (CO2, I2C)      ─────────►Tailscale      ──MQTT────►         2× 8CH relay board
 buck 24→5 V                                        povel ventilu         │
 regulace v boxu                                                 24V/5A PSU + pojistky
                                                                           │
@@ -51,7 +51,7 @@ Relay board IN pin ← GPIO Pi (tabulka 12 pinů: `docs/setup-prirucka.md §3`),
 ### Varianta B — ESP32 akter (doporučená)
 `firmware/esphome/central-actor.yaml`: 12× `switch.gpio` → IN boardu, přijímá `vyt/jX/valve` přímo z brokeru. Restart/reboot HA je pro topení neviditelný (GPIO Pi se nikdy nepoužijí); akter startuje `restore_mode: ALWAYS_OFF` a do 4 min dostane retained stav od boxů. Akter je galvanicky oddělen od 230 V strany (napájení USB/5V, relé opto + vlastní cívkový PSU). Cena dílu ~200 Kč.
 
-Obě varianty: relay board JD-VCC odříznout, cívky napájet z vlastního 5 V/3 A PSU, GND logiky = GND zdroj logiky (Pi u A / ESP32 u B).
+Obě varianty: 2× 8CH relay board (optočleny, low-trigger). JD-VCC odříznout, cívky z vlastního 5 V/3 A PSU, VCC logiky z 3V3 MCU (Pi u A / ESP32 u B), GND MCU se s deskou nepojuje. Spínání aktivní LOW → `inverted: true`.
 
 ## 7. Failsafe matice
 | Porucha | Detekce | Akce |

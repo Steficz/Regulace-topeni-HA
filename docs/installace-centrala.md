@@ -12,21 +12,22 @@ V centrální krabici (3D tisk nebo DIN krabička 200×120×75):
 ## GPIO pinout
 Kanály J1–J12 a přiřazení 12 GPIO: **canonical tabulka je `docs/setup-prirucka.md §3`** (tento dokument ji neopakuje, ať se nerozjíždějí).
 
-## Zapojení relé boardu
-1. **ODŘEZAT jumper JD-VCC** (oddělit cívky od logiky = optočlenová izolace funguje).
-2. VCC (strana cívky) ← externí 5 V/2–3 A PSU `+`; GND (strana cívky) ← PSU `−`.
-3. GND (strana logiky IN) ← **GND Raspberry Pi** (pin 6 nebo 9) — společná reference!
-4. IN0..IN11 ← GPIO dle tabulky (ploché kabely / Dupont).
-5. COM/NF kontakt relé do série s 24 V větví: `PSU 24V+ → pojistka 1A → relé COM → relé NO → silná linka žíla A → pohon → silná linka žíla B → PSU GND`.
-6. Tenká linka: `PSU 24V+ → pojistka 0.5 A → žíla → box; žíla zpět → PSU GND` (nespíná se!).
+## Zapojení relé boardů (2× 8CH, optočleny, low-trigger)
+1. **ODŘEZAT jumper JD-VCC** (oddělit cívkovou větev od logiky).
+2. JD-VCC ← externí 5 V/3 A PSU `+`; JD-GND ← PSU `−` (strana cívek).
+3. VCC desky (logika) ← **3V3 Raspberry Pi** (sytí opto-LEDky ~2 mA/kanál). **GND Pi se s deskou nepojuje** — úplná galvanická izolace.
+4. IN0..IN11 ← GPIO dle tabulky. **Logika je LOW = relé SEPNUTÉ** → HA GPIO switch i akter nastaven `inverted`.
+5. Kontrola bezpečného startu: VCC desky zapoj, IN nech viset → relé MUSÍ být rozepnutá (desky mívají pull-up na IN; když ne, přidej na IN R 10k k VCC desky).
+6. COM/NO kontakt relé do série s 24 V větví: `PSU 24V+ → pojistka 1A → relé COM → relé NO → silná linka žíla A → pohon → silná linka žíla B → PSU GND`.
+7. Tenká linka: `PSU 24V+ → pojistka 0.5 A → žíla → box; žíla zpět → PSU GND` (nespíná se!).
 
-> **Logika sepnutí:** HA GPIO switch sepnutí = relé ON = 24 V na pohon. NC voskový pohon: bez napětí zavřeno, s napětím otevírá → relé ON = topení ON. Při bootu Pi jsou GPIO input/pull-down → logika optočlenu nedodává signál → relé rozepnuto = bezpečný stav. Po startu HA navíc pojistka automation „vše OFF". Test: odpoj logiku, změřit kontinuitu na 24V svorkách — musí být otevřeno.
+> **Logika sepnutí:** HA switch ON = GPIO LOW = opto vodi = relé sepnuto = 24 V na pohon → topení (NC voskový pohon bez napětí zavře). Při bootu Pi jsou GPIO input + pull-up na IN → relé rozepnuta = bezpečný start. Po startu HA zajišťuje bezpečný stav automation „boot safe off".
 
-## Fallback, kdyby GPIO integration vrtala
-HA OS `switch.gpio` (pygpiod) obvykle funguje bez problémů; alternativa bez měnění designu: **ESP32-C6/C3 v centrále jako „aktér"** s ESPHome (subscribe `vyt/jX/valve` → GPIO output → relay board). Firmware je připraven (viz git history, variant `central-actor.yaml`); MQTT topic se nemění.
+## Fallback, kdyby GPIO integrace vrtala
+HA OS GPIO (pygpiod) obvykle funguje; celý design se nemění:* **ESP32 akter** (`firmware/esphome/central-actor.yaml`, varianta B) — MQTT topics, automations i dashboard zůstávají.
 
 ## Krok za krokem
-1. Nabootovat HA OS na RPi3 z SSD, doinstalovat add-ony: Mosquitto, Tailscale, ESPHome.
+1. Nabootovat HA OS na RPi3 z NVMe, doinstalovat add-ony: Mosquitto, Tailscale, ESPHome.
 2. V `configuration.yaml` include soubory z `ha/` (switch-gpio, automations, lovelace resource).
 3. Restart HA → 8 switch entit `switch.vyt_j1…j8`; ručně otestovat each s multimetrem na 24V svorkách.
 4. Připojit jeden testovací pohon na J1, pojistka 1A.

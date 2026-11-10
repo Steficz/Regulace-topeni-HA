@@ -8,13 +8,13 @@ PINS = ["GPIO4","GPIO16","GPIO17","GPIO18","GPIO19","GPIO21",
 print("""# ============================================================
 # Varianta B — centralni akter na ESP32 (AUTO-GENEROVANO
 # scripts/gen-central.py — source pravdy = PINS v nem)
-# ESP32 devkit v4 + ESPHome; 12x gpio switch -> IN relay boardu.
-# Vyhoda: pri restartu/rebootu HA (a) GPIO Pi nespadnou do inputu,
-# (b) topeni bezima dal; RPi je "mozna", ale ne elektricka cesta.
+# ESP32 devkit v4 + ESPHome; 12x gpio switch (INVERTED) -> IN relay boardu.
 #
-# Zapojeni: relay board JD-VCC ODREZAT; cevky z vlastniho 5V/3A PSU;
-# GND logiky relay boardu === GND ESP32 (spolecny zem, napr. přes USB
-# napajeci GND, nebo kabelem). INx <-> GPIO dle tabulky níže.
+# Zapojeni (Smart Electronics 8CH boardy, low-trigger, 2x8=16 kanalu):
+#   VCC desky      <- ESP32 3V3 (napaji opto-LEDky, ~2 mA/kanal)
+#   INx            <- GPIO dle tabulky; LOW = relé SEP (proto inverted)
+#   JD-VCC jumper  ODREZAT; JD-VCC <- externi 5V/3A PSU "+"; GND PSU <- JD-GND
+#   GND ESP32 se k desce NEPOJUVA — uplna galvanicka izolace optoclennem.
 # ============================================================
 substitutions:
   device_name: vyt-central
@@ -69,5 +69,5 @@ for i, pin in enumerate(PINS, 1):
     name: "J{i} ventil"
     id: v{i}
     pin: {pin}
-    inverted: false
+    inverted: true
     restore_mode: ALWAYS_OFF""")
