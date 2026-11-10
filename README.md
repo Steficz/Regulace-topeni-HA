@@ -70,6 +70,7 @@ Parametry sítě: Wi-Fi 2.4 GHz, 13–14 klientů; broker `192.168.1.10:1883` (s
 | [docs/nakupni-plan.md](docs/nakupni-plan.md) | nákup: MVP 1 místnost / plný rozsah |
 | [docs/3d-tisk.md](docs/3d-tisk.md) | tiskové modely a pravidla |
 | [docs/senzory.md](docs/senzory.md) | srovnání senzorů a volba |
+| [docs/rozdeleni-hw.md](docs/rozdeleni-hw.md) | rozdělení HW lokalita (UniFi+HA) |
 
 ## Repozitář
 
