@@ -5,7 +5,7 @@ V centrální krabici (3D tisk nebo DIN krabička 200×120×75):
 - RPi 3 s HA OS (SSD/USB disk, ne SD karta — dlouhodobý provoz!)
 - napájecí 5 V/3 A USB PSU (pro Pi) + druhý 5 V/2–3 A PSU pro cívky relé
 - 24 V/5 A PSU (Mean Well HDR-150-24 nebo levnější Ali) pro ventily + tenké linky
-- 2× 8CH relay board (nebo 1× 16CH) — musí mít **optočlenový vstup** a podporu 3.3 V logiky
+- 3× 8CH relay board TONGLING (vlastněné; optočleny, JD-VCC header, cívky 5 V)
 - lišta pojistek: 8× 1 A (ventily) + 8× 0.5 A (senzory), nebo automat. jističky 6A/10A
 - svorkovnice: WAGO 2p×16 + ochranné svorky
 

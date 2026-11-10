@@ -41,4 +41,4 @@ MVP test: box běží, MQTT flow do relé, změříš dynamiku pohonu + RSSI. Ro
 - SCD40 vs SCD30: SCD40 nižší cena a menší rozměry než SCD30; volba SCD40.
 - pohony Ali (tvoje testovací, ~150 Kč/ks + doprava) vs CZ sklad (350+): riziko delší dodání, ale funkčně doloženo tebou.
 
-Kapacity počítané pro 12: 24V/5A PSU ✓ (peak 12×(100+45)mA ≈ 1.75 A), relay board 16CH ✓ (12+, 4 volné), zdroj pro Pi: NVMe+WiFi ~0.7 A na 5V z vlastního PSU, GPIO varianta: cívky 12×70 mA = 0.84 A → 5V/3A PSU s rezervou ✓.
+Kapacity počítané pro 12: 24V/5A PSU ✓ (peak 12×(100+45)mA ≈ 1.75 A), 3× 8CH boardy ✓ (24 kan., 12 volných po obsazení J1–J12), zdroj pro Pi: NVMe+WiFi ~0.7 A na 5V z vlastního PSU, GPIO varianta: cívky 12×70 mA = 0.84 A → 5V/3A PSU s rezervou ✓.
