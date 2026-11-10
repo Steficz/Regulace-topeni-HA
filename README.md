@@ -69,6 +69,7 @@ Parametry sítě: Wi-Fi 2.4 GHz, 13–14 klientů; broker `192.168.1.10:1883` (s
 | [docs/installace-pokoj.md](docs/installace-pokoj.md) | stavba a montáž boxu, měřicí checklist |
 | [docs/nakupni-plan.md](docs/nakupni-plan.md) | nákup: MVP 1 místnost / plný rozsah |
 | [docs/3d-tisk.md](docs/3d-tisk.md) | tiskové modely a pravidla |
+| [docs/wireframes/](docs/wireframes/) | wireframy dashboardu 1–3 (html, render png) |
 | [docs/senzory.md](docs/senzory.md) | srovnání senzorů a volba |
 | [docs/rozdeleni-hw.md](docs/rozdeleni-hw.md) | rozdělení HW lokalita (UniFi+HA) |
 

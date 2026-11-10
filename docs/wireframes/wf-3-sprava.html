@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="cs"><head><meta charset="UTF-8"><title>Wireframe — Správa</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+ body{margin:0;background:#020617;color:#e2e8f0;font-family:'JetBrains Mono',monospace;}
+ .wrap{max-width:1240px;margin:0 auto;padding:22px;}
+ h1{font-size:17px;margin:0 0 4px;} .cap{color:#475569;font-size:10px;margin:0 0 14px;}
+ .cols{display:grid;grid-template-columns:1.5fr 1fr;gap:14px;}
+ .panel{background:#0f172a;border:1px solid #1e293b;border-radius:12px;padding:12px 14px;}
+ .panel h3{font-size:12px;margin:0 0 10px;color:#94a3b8;}
+ table{width:100%;border-collapse:collapse;font-size:10px;}
+ th{color:#475569;text-align:left;font-weight:400;padding:3px 6px;border-bottom:1px solid #1e293b;}
+ td{padding:4px 6px;border-bottom:1px solid #0d1626;color:#94a3b8;}
+ td b{color:#e2e8f0;font-weight:600;}
+ .st{font-size:9px;padding:1px 7px;border-radius:7px;}
+ .on{background:rgba(124,45,18,.5);color:#fb923c;} .idle{background:#1e293b;color:#64748b;}
+ .bad{background:rgba(127,29,29,.5);color:#f87171;} .ok{background:rgba(6,78,59,.5);color:#34d399;}
+ .bar{height:9px;background:#1e293b;border-radius:5px;position:relative;margin:4px 0 10px;}
+ .bar i{position:absolute;left:0;top:0;bottom:0;border-radius:5px;background:#38bdf8;}
+ .bar.warn i{background:#fbbf24;} .bar.bad i{background:#f87171;}
+ .kv{display:flex;justify-content:space-between;font-size:10px;color:#64748b;margin-bottom:3px;}
+ .kv b{color:#e2e8f0;}
+ .log{font-size:9px;line-height:1.9;color:#475569;background:#020617;border:1px solid #1e293b;border-radius:8px;padding:8px 10px;margin-top:10px;height:120px;overflow:hidden;}
+ .log .w{color:#fbbf24;} .log .e{color:#f87171;} .log .i{color:#34d399;}
+ .btn{display:inline-block;font-size:9px;border:1px solid #334155;border-radius:8px;padding:3px 9px;color:#94a3b8;margin:8px 6px 0 0;}
+ .btn.red{border-color:#7f1d1d;color:#f87171;}
+</style></head><body><div class="wrap">
+ <h1>3 · SPRÁVA SYSTÉMU</h1>
+ <div class="cap">desk view, jen pro admin — na 1GB Pi nejdůležitější obrazovka projektu</div>
+ <div class="cols">
+  <div class="panel"><h3>ZÓNY J1–J12 — dohled</h3>
+   <table><tr><th>zóna</th><th>ventil</th><th>heart-beat</th><th>MQTT</th><th>T čidlo</th><th>CO₂ kalbrace</th><th>relé GPIO</th></tr>
+   <tr><td><b>J1 Můj pokoj</b></td><td><span class="st on">ON 31 min</span></td><td><b>8 s</b></td><td><span class="st ok">OK</span></td><td><span class="st ok">OK</span></td><td>self-cal d4</td><td>GPIO4</td></tr>
+   <tr><td><b>J2 Hostovský</b></td><td><span class="st idle">OFF</span></td><td><b>12 s</b></td><td><span class="st ok">OK</span></td><td><span class="st ok">OK</span></td><td>self-cal d4</td><td>GPIO17</td></tr>
+   <tr><td><b>J3 Koupelna dole</b></td><td><span class="st on">ON 20 min</span></td><td><b>9 s</b></td><td><span class="st ok">OK</span></td><td><span class="st ok">OK</span></td><td>self-cal d2</td><td>GPIO27</td></tr>
+   <tr><td><b>J4 Kuchyně</b></td><td><span class="st idle">OFF</span></td><td><b>15 s</b></td><td><span class="st ok">OK</span></td><td><span class="st ok">OK</span></td><td>—</td><td>GPIO22</td></tr>
+   <tr><td><b>J5 Obývák 2</b></td><td><span class="st on">ON 44 min</span></td><td><b>6 s</b></td><td><span class="st ok">OK</span></td><td><span class="st ok">OK</span></td><td>self-cal d5</td><td>GPIO23</td></tr>
+   <tr><td><b>J6 Předsíň</b></td><td><span class="st idle">OFF</span></td><td><b>11 s</b></td><td><span class="st ok">OK</span></td><td><span class="st ok">OK</span></td><td>—</td><td>GPIO24</td></tr>
+   <tr><td><b>J7 Šatna dole</b></td><td><span class="st idle">OFF</span></td><td><b>14 s</b></td><td><span class="st ok">OK</span></td><td><span class="st ok">OK</span></td><td>—</td><td>GPIO7</td></tr>
+   <tr><td><b>J8 Koupelna nahoře</b></td><td><span class="st on">ON 12 min</span></td><td><b>10 s</b></td><td><span class="st ok">OK</span></td><td><span class="st ok">OK</span></td><td>self-cal d3</td><td>GPIO8</td></tr>
+   <tr><td><b>J9 Ložnice nahoře</b></td><td><span class="st idle">OFF</span></td><td><b>7 s</b></td><td><span class="st ok">OK</span></td><td><span class="st ok">OK</span></td><td>self-cal d5</td><td>GPIO10</td></tr>
+   <tr><td><b>J10 Horní paluba</b></td><td><span class="st bad">TTL OFF</span></td><td><b style="color:#f87171">12 min!</b></td><td><span class="st bad">ztráta</span></td><td><span class="st idle">last 17.9°</span></td><td>—</td><td>GPIO9</td></tr>
+   <tr><td><b>J11 Horní šatna</b></td><td><span class="st idle">OFF</span></td><td><b>13 s</b></td><td><span class="st ok">OK</span></td><td><span class="st ok">OK</span></td><td>—</td><td>GPIO11</td></tr>
+   <tr><td><b>J12 Horní pokoj</b></td><td><span class="st idle">OFF</span></td><td><b>9 s</b></td><td><span class="st ok">OK</span></td><td><span class="st ok">OK</span></td><td>self-cal d1</td><td>GPIO25</td></tr></table>
+   <div><span class="btn">restart ESPHome zóny</span><span class="btn">force OFF kanál</span><span class="btn red">VYPNOUT VŠE (údržba)</span></div>
+  </div>
+  <div><div class="panel"><h3>HOST — RPi 3B 1GB (kritický zdroj!) </h3>
+   <div class="kv"><span>RAM</span><b>546 / 906 MB</b></div><div class="bar warn"><i style="width:60%"></i></div>
+   <div class="kv"><span>SWAP</span><b>0.8 / 2.0 GB</b></div><div class="bar warn"><i style="width:41%"></i></div>
+   <div class="kv"><span>SD/SSD zápis dnes</span><b>210 MB</b></div><div class="bar"><i style="width:35%"></i></div>
+   <div class="kv"><span>CPU load 15m</span><b>0.6</b></div><div class="bar"><i style="width:15%"></i></div>
+   <div class="kv"><span>containers</span><b>unifi ▲ unhealthy · HA ● · mosquitto ●</b></div>
+   <div class="kv"><span>recorder retention</span><b>2 dny (SSD životnost)</b></div>
+  </div>
+  <div class="panel" style="margin-top:12px"><h3>ALERTY / LOG</h3>
+   <div class="log"><span class="e">14:05 ERR vyt/j10 heartbeat TTL 600s → GPIO9 OFF (bezpečný stav)</span><br>
+   <span class="w">13:58 WARN unifi container healthcheck fail (mongo probe) — služby OK</span><br>
+   <span class="i">13:40 INFO vyt/j3 RH 68% nad 65% — doporučit větrání</span><br>
+   <span class="w">13:12 WARN RAM > 600 MB — zvaž presun unifi na Z2W</span><br>
+   <span class="i">12:00 INFO plan: J1..J12 preset Comfort</span><br>
+   <span class="i">06:00 INFO plan: All OFF test OK (boot safe)</span></div>
+   <div><span class="btn">tichý režim 8h</span><span class="btn">export CSV 24h</span><span class="btn">tail log</span></div>
+  </div></div>
+ </div>
+</div></body></html>
