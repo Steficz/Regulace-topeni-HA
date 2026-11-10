@@ -1,0 +1,48 @@
+# Lovelace dashboard — VYTÁPĚNÍ (dark)
+# Vlozit jako "Manual" card do view, nebo pouzit jako whole dashboard yaml resource.
+# Predpoklada entity z ESPHome device auto-discovery (sensor.vyt_jX_*) +
+# switch.vyt_jX (GPIO) + number.vyt_jX_cilova_teplota.
+title: Vytápění
+views:
+  - title: Vytápění
+    path: vytapeni
+    icon: mdi:radiator
+    cards:
+      - type: markdown
+        content: "## Regulace 8 pokojů · centrála RPi3 · stav: pilot"
+      - type: grid
+        columns: 2
+        cards:
+          # --- karta pokoje (zkopirovat pro j2..j8) ---
+          - type: entities
+            title: "J1 · Obývák"
+            show_header_toggle: false
+            entities:
+              - entity: sensor.vyt_j1_teplota
+                name: Teplota
+              - entity: number.vyt_j1_cilova_teplota
+                name: Cíl
+              - entity: sensor.vyt_j1_co2
+                name: CO₂
+              - entity: sensor.vyt_j1_vlhkost
+                name: Vlhkost
+              - type: custom:conditional
+                conditions: [{entity: switch.vyt_j1, state_on: true}]
+                card:
+                  type: markdown
+                  content: "🔥 ventil OTEVŘENO"
+              - type: custom:conditional
+                conditions: [{entity: switch.vyt_j1, state_on: false}]
+                card:
+                  type: markdown
+                  content: "✅ ventil ZAVŘENO"
+              - entity: sensor.vyt_j1_rssi
+                name: signál
+              - type: divider
+              - entity: switch.vyt_j1
+                name: "Ruční override ventilu"
+          - type: markdown
+            content: |
+              **Režimy** (plány): Helpers → Schedule. Ráno 06:00 Comfort 21.5,
+              noc 22:30 Eco 19. Tlačítka-scény sem doplnime po pilotovi.
+              Pod 8 °C = mrazovka, nad 1400 ppm CO₂ = alerta "větrat".

@@ -1,0 +1,165 @@
+# ============================================================
+# ESPHome firmware — steny box regulace vytapeni (mistnost J1)
+# Dalsi mistnosti: kopie -> prepis substitutions j1->j2.. a J1->J2..
+#
+# Desk:  ESP32-C6 supermini (pokud nemas tuto desku, prepis board + i2c piny)
+# Napajeni: 24V po tenke lince -> buck MP1584 nastaven na 5.0V -> USB-C desky
+# Cidla:   SHT40 (T/RH) + SCD40 (CO2) z zehny I2C
+#
+# Logika:  lokalni bang-bang — ON pri T < setpoint-0.3, OFF pri T > setpoint+0.5
+#          min ON 25 min, min OFF 20 min, mrazovka: T < 8°C = vynutit ON
+# Vystup:  MQTT vyt/j1/valve = "ON"/"OFF" (retained) -> HA automation sepne rele
+# Vstup:   MQTT vyt/j1/setpoint = cislo (21.5) z HA (schedule/planner)
+#
+# pred flashem vypln: wifi_ssid/wifi_password v esphome/secrets.yaml,
+# MQTT user/pass + IP brokera, API/OTA klice (ESPHome dashboard je vygeneruje)
+# ============================================================
+substitutions:
+  device_name: vyt-j1
+  friendly_name: "Pokoj J1"
+  room: j1
+
+esphome:
+  name: ${device_name}
+  friendly_name: ${friendly_name}
+  on_boot:
+    priority: 600
+    then:
+      - mqtt.publish:
+          topic: vyt/${room}/heartbeat
+          payload: "online"
+
+captive_portal:
+logger:
+api:
+  encryption:
+    key: "REPLACE_VYGENERUJ_DASHBOARD"   #[REDACTED]
+ota:
+  - platform: esphome
+    password: "REPLACE_VYGENERUJ_DASHBOARD" #[REDACTED]
+
+wifi:
+  ssid: !secret wifi_ssid
+  password: !secret wifi_password          #[REDACTED]
+  ap:
+    ssid: "${device_name}-fallback"
+    password: "zmen-heslo-zde"             #[REDACTED]
+
+mqtt:
+  broker: 192.168.1.10        # staticka IP Raspberry Pi s Mosquitto
+  username: !secret mqtt_user   #[REDACTED]
+  password: !secret mqtt_pass   #[REDACTED]
+  topic_prefix: esphome/${device_name}
+  on_message:
+    - topic: vyt/${room}/setpoint
+      then:
+        lambda: |-
+          float v;
+          if (x.parse_into<float>(v) && v > 5 && v < 30) {
+            id(setpoint) = v;
+            id(setpoint_num).publish_state(v);
+          }
+
+esp32:
+  board: esp32-c6-devkitm-1
+  framework:
+    type: arduino
+
+i2c:
+  - id: bus_a
+    sda: 6          # UPRAVIT DLE SKUTEČNÉ DESKY (supermini: GPIO6/7 volné)
+    scl: 7
+    scan: true
+
+sensor:
+  - platform: sht4x
+    temperature:
+      name: "Teplota"
+      id: temp_meas
+      filters:
+        - sliding_window_moving_average: {window_size: 12, send_every: 4}
+    humidity:
+      name: "Vlhkost"
+    update_interval: 15s
+  - platform: scd4x
+    co2:
+      name: "CO2"
+    update_interval: 30s
+  - platform: wifi_signal
+    name: "RSSI"
+    update_interval: 60s
+
+number:
+  - platform: template
+    name: "Cilova teplota"
+    id: setpoint_num
+    optimistic: true
+    min_value: 5
+    max_value: 30
+    step: 0.5
+    restore_value: true
+    initial_value: "21"
+    on_value:
+      then:
+        - lambda: 'id(setpoint) = x;'
+
+binary_sensor:
+  - platform: template
+    name: "Ventil pozadavek"
+    id: valve_req
+
+globals:
+  - id: setpoint
+    type: float
+    restore_value: true
+    initial_value: "21.0"
+  - id: valve_on
+    type: bool
+    restore_value: true
+    initial_value: "false"
+  - id: t_change
+    type: "unsigned long"
+    restore_value: false
+    initial_value: "0"
+  - id: repub_tick
+    type: "unsigned int"
+    restore_value: false
+    initial_value: "0"
+
+interval:
+  - interval: 60s
+    then:
+      lambda: |-
+        float t = id(temp_meas).state;
+        if (std::isnan(t)) return;
+        // každy 4. tick znovu publikuj stav (po restartu HA/sbite GPIO
+        // musi relé dostat desired state znovu, i bez změny)
+        id(repub_tick) = (id(repub_tick) + 1) % 4;
+        if (id(repub_tick) == 0) id(publish_valve).perform();
+        uint32_t now = millis();
+        const uint32_t MIN_ON_MS = 25u * 60000u, MIN_OFF_MS = 20u * 60000u;
+        bool cur = id(valve_on);
+        bool want = cur;
+        // prepnuti podle hysterze
+        if (t < id(setpoint) - 0.3f) want = true;
+        else if (t > id(setpoint) + 0.5f) want = false;
+        // mrazovka muze prepsout i min-doby, pri nizke T je ochrana prednost
+        if (t < 8.0f) want = true;
+        // respektuj minimalni doby (krome pripadu, kdy uz je stav spravne)
+        if (want != cur) {
+          uint32_t elapsed = now - id(t_change);
+          if (cur && elapsed < MIN_OFF_MS) return;   // jeste nesmim vypnout
+          if (!cur && elapsed < MIN_ON_MS) return;   // jeste nesmim zapnout
+          id(valve_on) = want;
+          id(t_change) = now;
+          id(valve_req).publish_state(want);
+          id(publish_valve).perform();
+        }
+
+script:
+  - id: publish_valve
+    then:
+      - mqtt.publish:
+          topic: vyt/${room}/valve
+          payload: !lambda 'return id(valve_on) ? "ON" : "OFF";'
+          retain: true

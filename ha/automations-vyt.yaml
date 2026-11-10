@@ -1,0 +1,129 @@
+# ============================================================
+# HA automations — regulace vytapeni (8 zón)
+# includni do configuration.yaml:
+#   automation yaml! nebo přes "automations.yaml" include
+# Predpoklada: MQTT integration (Mosquitto), entity switch.vyt_jX,
+#   notify.mobile_app_<telefon> (uprav podle own notify služby)
+# ============================================================
+
+# --- 1) MQTT pozadavek boxu -> relé (8x, stejny vzor) ---
+- alias: "Vyt J1: box zadava ventil"
+  triggers:
+    - trigger: mqtt
+      topic: "vyt/j1/valve"
+  conditions: []
+  actions:
+    - choose:
+        - conditions: "{{ trigger.payload == 'ON' }}"
+          sequence: [{action: switch.turn_on, target: {entity_id: switch.vyt_j1}}]
+        - conditions: "{{ trigger.payload == 'OFF' }}"
+          sequence: [{action: switch.turn_off, target: {entity_id: switch.vyt_j1}}]
+  mode: queued
+# (zkopirovat pro j2..j8; generátor: scripts/gen-zone.py)
+
+# --- 2) Bezpecny start: pri bootu HA vsechny ventily OFF ---
+- alias: "Vyt: boot safe off"
+  triggers:
+    - trigger: homeassistant
+      event: start
+  actions:
+    - action: switch.turn_off
+      target:
+        entity_id:
+          - switch.vyt_j1
+          - switch.vyt_j2
+          - switch.vyt_j3
+          - switch.vyt_j4
+          - switch.vyt_j5
+          - switch.vyt_j6
+          - switch.vyt_j7
+          - switch.vyt_j8
+
+# --- 3) TTL failsafe: box mlci > 10 min a kanal ON -> vypnut + alerta ---
+#  (ESPHome sensor "teplota" kazdych 15 s; timeout = 10 min neaktivity)
+- alias: "Vyt: TTL heartbeat J1"
+  triggers:
+    - trigger: state
+      entity_id: sensor.vyt_j1_teplota
+      to: "unavailable"
+      for: "00:10:00"
+  actions:
+    - action: switch.turn_off
+      target: {entity_id: switch.vyt_j1}
+    - action: persistent_notification.create
+      data:
+        notification_id: vyt_offline_j1
+        title: "Vytápění J1 offline"
+        message: "Box J1 se 10 min neozývá — ventil vypnut. Zkontroluj napájení/Wi-Fi."
+# (zkopirovat j2..j8; notif na telefon: notify.mobile_app...)
+
+# --- 4) Mrazova ochrana centraly: pokud je nektery box offline a T klesne
+#        pod 8 jinde (sdileny odhad), pouzijeme notifikaci — mrazovy trickle
+#        je primarne na BOXU (kdyz box zyje). Bez boxu muzeme jen blikat. ---
+- alias: "Vyt: mrázova alerta (každých 30 min)"
+  triggers:
+    - trigger: time_pattern
+      minutes: "/30"
+  conditions:
+    - condition: template
+      value_template: >
+        {% set temps = states | selectattr('entity_id','search','^sensor\\.vyt_j._teplota$')
+              | map(attribute='state') | map('float', 99) | list %}
+        {{ (temps | min) < 8.0 }}
+  actions:
+    - action: persistent_notification.create
+      data:
+        notification_id: vyt_mraz
+        title: "Pozor: místnost pod 8 °C"
+        message: "Regulace nestíhá — zkontroluj kotel/ventily."
+
+# --- 5) CO2 alerta (čáry: větrej!) ---
+- alias: "Vyt: CO2 > 1400 ppm"
+  triggers:
+    - trigger: numeric_state
+      entity_id:
+        - sensor.vyt_j1_co2
+        - sensor.vyt_j2_co2
+        - sensor.vyt_j3_co2
+        - sensor.vyt_j4_co2
+        - sensor.vyt_j5_co2
+        - sensor.vyt_j6_co2
+        - sensor.vyt_j7_co2
+        - sensor.vyt_j8_co2
+      above: 1400
+      for: "00:05:00"
+  actions:
+    - action: persistent_notification.create
+      data:
+        notification_id: "co2_{{ trigger.to_state.entity_id }}"
+        title: "CO2 — větrat"
+        message: "{{ trigger.to_state.attributes.friendly_name }}: {{ trigger.to_state.state }} ppm"
+
+# --- 6) Setpoint scheduler (příklad): ranní Comfort 21.5 / noční Eco 19 ---
+#  reálně použij Helpers→Schedule nebo input_datetime; publikace do MQTT:
+- alias: "Vyt: Comfort ráno"
+  triggers:
+    - trigger: time
+      at: "06:00:00"
+  actions:
+    - repeat:
+        count: 8
+        sequence:
+          - action: mqtt.publish
+            data:
+              topic: "vyt/j{{ repeat.index }}/setpoint"
+              payload: "21.5"
+              retain: true
+- alias: "Vyt: Eco noc"
+  triggers:
+    - trigger: time
+      at: "22:30:00"
+  actions:
+    - repeat:
+        count: 8
+        sequence:
+          - action: mqtt.publish
+            data:
+              topic: "vyt/j{{ repeat.index }}/setpoint"
+              payload: "19.0"
+              retain: true
