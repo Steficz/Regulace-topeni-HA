@@ -1,67 +1,95 @@
-# Regulace vytápění — 8 pokojů (Řízeno Home Assistantem)
+# Regulace vytápění — 12 místností, Home Assistant
 
-**Stav: design v0.4 schválený architektura — HW pilot připraven na náklistek.**
-Dům: 2 patra, ~200 m²/patro, centrála v přízemí. Na každý pokoj existují 2 linky z centrály:
-- **silná 2×0.5–0.75 mm²** → k radiátoru (pro pohon ventilu)
-- **tenká 2×~0.1 mm² (0.05–0.1)** → do místa starého prostorového čidla (napájení stěnového boxu)
+Systém room-by-room regulace radiátorového vytápění. Každá místnost má stěnový měřicí box (teplota, vlhkost, CO₂) na stávající tenké lince a voskový pohon ventilu 24 V na stávající silné lince. Rozhodování probíhá v boxu, výkon spíná centrála.
 
-## Architektura v0.4 — stručně
+## Architektura
 
 ```
-[Stěnový box ×8]                       [Centrála — RPi 3]
-ESP32-C6 + SHT40 + SCD40               HA + Mosquitto + Tailscale
-buck 24→5V (z tenké linky)             GPIO ──► 16CH relay board ──► 24V/5A PSU
-regulace běží ZDE (bang-bang)                      │ jističe 1A/kanál
+Stěnový box (×12)                      Centrála
+ESP32-C6 + SHT40 + SCD40               RPi 3: Home Assistant, Mosquitto, Tailscale
+buck 24→5 V (tenká linka)              + relay board 16CH
+regulace: bang-bang, hystereze ±0.3/0.5 K,          ├── varianta A: GPIO Pi přímo
+mrazovka, min ON/OFF režimové doby             └── varianta B: ESP32 akter (doporučeno)
         │                                          │
-        └── Wi-Fi / MQTT ──► HA ──► automation ──► switch (relé) ──► silná linka ──► pohon 24V NC M30x1.5
+        └── Wi-Fi 2.4 / MQTT ──► HA ──► relé ──► 24 V PSU ──► silná linka ──► pohon NC M30×1.5
 ```
 
-- **Regulace (hystereze, mrazovka) žije na stěnovém boxu** — správné měřicí místo, nezávislost na HA.
-- **Povel ventilu**: box publikuje MQTT `vyt/jX/valve` → HA automation přepne relé na GPIO → 24 V jde po silné lince do voskového pohonu.
-- **Žádná centrální ESP32** — výkonná stage = RPi 3 GPIO + reléový board (znovuvyužití hardwaru, který už máš).
-- **Failsafe**: heartbeat boxu 30 s; HA hlídá TTL (10 min bez TL = relé OFF + notifikace); výpadek napájení = NC pružinou zavře; mrazový trickle v HA automation.
+- Box publikuje setpoint i stav; centrála vykonává a hlídá failsafe (TTL heartbeat).
+- Bez napájení zavírá ventil pružina (typ pohonu NC).
 
-## Proč 24 V po tenké lince a buck v každém boxu (ne 5 V rozvod)
+## Místnosti a mapa
 
-| | 5 V rozvod | 24 V rozvod + buck 60 Kč |
+| id | místnost | MQTT topic | HA entita |
+|---|---|---|---|
+| J1 | Můj pokoj | `vyt/j1/*` | `switch.vyt_j1` |
+| J2 | Hostovský | `vyt/j2/*` | `switch.vyt_j2` |
+| J3 | Koupelna dole | `vyt/j3/*` | `switch.vyt_j3` |
+| J4 | Kuchyně | `vyt/j4/*` | `switch.vyt_j4` |
+| J5 | Obývák 2 | `vyt/j5/*` | `switch.vyt_j5` |
+| J6 | Předsíň | `vyt/j6/*` | `switch.vyt_j6` |
+| J7 | Šatna dole | `vyt/j7/*` | `switch.vyt_j7` |
+| J8 | Koupelna nahoře | `vyt/j8/*` | `switch.vyt_j8` |
+| J9 | Ložnice nahoře | `vyt/j9/*` | `switch.vyt_j9` |
+| J10 | Horní paluba | `vyt/j10/*` | `switch.vyt_j10` |
+| J11 | Horní šatna | `vyt/j11/*` | `switch.vyt_j11` |
+| J12 | Horní pokoj | `vyt/j12/*` | `switch.vyt_j12` |
+
+Zdroj mapy: `scripts/gen-zone.py` (proměnná `ROOMS`).
+
+## MQTT interface
+
+| Topic | Směr | Payload | Retain |
+|---|---|---|---|
+| `vyt/jX/valve` | box → centrála | `ON` / `OFF` | ano |
+| `vyt/jX/setpoint` | HA → box | `21.5` | ano |
+| `vyt/jX/heartbeat` | box → HA | `online` | ne (30 s) |
+| `vyt/jX/preset` | HA → box | `comfort/eco/away/sleep` | ano |
+
+## Hardware — specifikace
+
+| Součástka | Specifikace | Množství |
 |---|---|---|
-| Proud boxu (špička ~1 W) | ~200 mA | ~45 mA |
-| Úbytek na 35 Ω (0.05 mm²/50 m) | **7 V → na boxu 0 V, brown-out** | 1.6 V → 22.4 V ✓ |
-| Zdroj | RPi 5V pin (~1 A budget, šumový) | nezávislý PSU + jistič/kanál |
+| Měřicí box | ESP32-C6, SHT40 (I2C), SCD40 (I2C), buck MP1584 24→5 V, pojistka 0.5 A | 12 |
+| Pohon ventilu | voskový, 24 V DC, NC, závit M30×1.5 | 12 |
+| Spínání | relay board 16CH, optočlenový vstup, JD-VCC oddělen, cívky z 5 V/3 A PSU | 1 |
+| Zdroj ventilů | 24 V / 5 A | 1 |
+| Řídicí unit | RPi 3, HA OS, NVMe | 1 |
+| Akter (varianta B) | ESP32 devkit | 1 |
+| Ochrana | 12× pojistka 1 A (ventily), 12× 0.5 A (boxy) | 24 |
 
-Buck (MP1584/3602 mini) stojí 20–40 Kč — to není položka, za kterou stojí riskovat nestabilní systém. 5 V rozvod je na tomto drátě fyzikálně vyloučený.
+Parametry sítě: Wi-Fi 2.4 GHz, 13–14 klientů; broker `192.168.1.10:1883` (statická reservace).
 
-## Proč Wi-Fi, ne Thread/Zigbee
-- ESP32-C6 umí Wi-Fi + 802.15.4 (Thread) zároveň, ale **Wi-Fi klient nemůže být redundance Thread mesh bez border routeru** (Thread provoz nemůže být překládán do Wi-Fi klientů „zadarmo“); vyžadoval by BR (SkyConnect/RPi dongle) a složitost navíc.
-- 10 zařízení na 2.4 GHz z routeru v přízemí, nejvzdálenější ~50 m vzduchem přes 2 patra: rozhodne pilot **měřením RSSI**; slabé místo se řeší druhým AP/mesh uzlem za ~600 Kč — levnější a jednodušší než jakýkoliv mesh protokol.
-- C6 proti C3 má připravenou cestu k Thread/Matter, kdybys chtěl v budoucnu rozšíření (okna, pohyby) — firmware se jen přidá.
+## Dokumentace
 
-## Složka tohoto repozitáře
+| Dokument | Obsah |
+|---|---|
+| [docs/design-v0.4.md](docs/design-v0.4.md) | inženýrské rozvedení, dimenzování linek, selhání |
+| [docs/setup-prirucka.md](docs/setup-prirucka.md) | instalace po krocích: HA, MQTT, GPIO/akter, boxy, flashování, uvedení do provozu |
+| [docs/installace-centrala.md](docs/installace-centrala.md) | zapojení centrály, GPIO tabulky |
+| [docs/installace-pokoj.md](docs/installace-pokoj.md) | stavba a montáž boxu, měřicí checklist |
+| [docs/nakupni-plan.md](docs/nakupni-plan.md) | nákup: MVP 1 místnost / plný rozsah |
+| [docs/3d-tisk.md](docs/3d-tisk.md) | tiskové modely a pravidla |
+
+## Repozitář
+
 ```
-README.md                  ← toto
-docs/design-v0.4.md        ← kompletní design (nahrazuje v0.3)
-docs/installace-centrala.md    ← RPi3 + relé + 24V PSU + jističe + GPIO pinout
-docs/installace-pokoj.md   ← stavba stěnového boxu, pilot, měření dynamiky
-docs/3d-tisk.md            ← parametrické modely (hardware/scad) + hotové alternativy
-firmware/esphome/box.yaml  ← ESPHome firmware stěnového boxu (šablona ×8)
-ha/switch-gpio.yaml        ← relé jako HA switch (pygpiod)
-ha/automations-vyt.yaml    ← mapování MQTT→relé, TTL failsafe, mrazovka, notifikace
-ha/lovelace-vyt.yaml       ← dashboard (dark, 8 zón + CO2 + stavy ventilů)
-hardware/scad/*.scad       ← krabice na 3D tisk (senzorový box, ventil, centrála)
+firmware/esphome/box.yaml             šablona stěnového boxu (×12, substitutions)
+firmware/esphome/central-actor.yaml   varianta B — ESP32 akter (generovaný)
+ha/switch-gpio.md                     varianta A — GPIO switches v HA
+ha/automations-vyt.yaml               J1 vzor + boot-safe-off, mrazovka, CO2, scény
+ha/automations-vyt-z2-z12.yaml        generované zóny J2–J12
+ha/lovelace-vyt.yaml                  dashboard (generovaný)
+scripts/gen-zone.py                   generator automations/dash (ROOMS)
+scripts/gen-central.py                generator aktéru (PINS)
+hardware/scad/                        parametrické krabice (OpenSCAD)
 ```
 
-## Cena (kabeláž existuje — 0 Kč)
-| Položka | ks | Kč celkem |
-|---|---|---|
-| Stěnový box (C6 + SHT40 + SCD40 + buck + příslušenství) | 8 | 5 600–7 200 |
-| Pohon 24 V NC M30×1.5 | 8 | 2 400–4 000 |
-| Relé board 16CH + 5V PSU + jističe + svorkovnice + PSU 24V/5A | 1 | ~1 700 |
-| 3D tisk (filament) | — | ~300 |
-| **Celkem** | | **~10–13 tis. Kč** |
+Po změně mapy místností/pinů: `python3 scripts/gen-zone.py > ... && python3 scripts/gen-central.py > ...` a commit.
 
-## Roadmap
-1. [ ] Nákup dílů (odkazy v docs/design-v0.4.md)
-2. [ ] Pilot 1 pokoj: box + relay kanál + HA automation + Tailscale; měření RSSI a časů pohonu
-3. [ ] Doladit parametry z pilotu → ostatní 3 pokoje
-4. [ ] Plné nasazení, plány/režimy, notifikace, doladění dashboardu
-5. [ ] Volitelně: 2. AP, UPS pro centrálu, boiler-demand kontakt
+## Stav
+
+- [x] design v0.4 finalized (12 místností, varianty A/B centrály)
+- [ ] nákup MVP
+- [ ] pilot J1: flash boxu, relay kanál, měření pohonu + RSSI
+- [ ] rollout J2–J12
+- [ ] plány, notifikace na telefon, doladění hysterezí

@@ -22,7 +22,7 @@
 
 ## Ověření
 - v HA Settings → Devices: `vyt-j1` se senzory `teplota`, `vlhkost`, `co2`, binární `valve_request`
-- rssi: ESPHome sensor `wifi_signal` — cíl > −70 dBm ve všech 8 místnostech (jinak 2. AP)
+- rssi: ESPHome sensor `wifi_signal` — cíl > −70 dBm ve všech 12 místnostech (jinak 2. AP)
 - simulace: `number.set` setpoint nad aktuální T → do 1 min `vyt/j1/valve` ON → HA relé sepnuté → 24 V na svorkách
 - mrazovka: ochladit čidlo (led ve skle) pod 8 °C → valve ON i bez HA
 

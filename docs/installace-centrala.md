@@ -9,26 +9,14 @@ V centrální krabici (3D tisk nebo DIN krabička 200×120×75):
 - lišta pojistek: 8× 1 A (ventily) + 8× 0.5 A (senzory), nebo automat. jističky 6A/10A
 - svorkovnice: WAGO 2p×16 + ochranné svorky
 
-## GPIO pinout (40pin header, BCM číslování)
-| Pokoj | GPIO BCM | Fyzický pin |
-|---|---|---|
-| J1 | 4 | 7 |
-| J2 | 17 | 11 |
-| J3 | 27 | 13 |
-| J4 | 22 | 15 |
-| J5 | 23 | 16 |
-| J6 | 24 | 18 |
-| J7 | 5 | 29 |
-| J8 | 6 | 31 |
-| GND (společná s relé boardem!) | — | piny 6, 9, 14, 20, 25, 30, 34, 39 |
-
-Volba: vyhýbám se 2/3 (I2C pro budoucí rozšíření), 14/15 (UART konzole), 8–11 (SPI).
+## GPIO pinout
+Kanály J1–J12 a přiřazení 12 GPIO: **canonical tabulka je `docs/setup-prirucka.md §3`** (tento dokument ji neopakuje, ať se nerozjíždějí).
 
 ## Zapojení relé boardu
 1. **ODŘEZAT jumper JD-VCC** (oddělit cívky od logiky = optočlenová izolace funguje).
 2. VCC (strana cívky) ← externí 5 V/2–3 A PSU `+`; GND (strana cívky) ← PSU `−`.
 3. GND (strana logiky IN) ← **GND Raspberry Pi** (pin 6 nebo 9) — společná reference!
-4. IN0..IN7 ← GPIO dle tabulky (plochý kabel 40pin → rozčesnout, nebo Dupont).
+4. IN0..IN11 ← GPIO dle tabulky (ploché kabely / Dupont).
 5. COM/NF kontakt relé do série s 24 V větví: `PSU 24V+ → pojistka 1A → relé COM → relé NO → silná linka žíla A → pohon → silná linka žíla B → PSU GND`.
 6. Tenká linka: `PSU 24V+ → pojistka 0.5 A → žíla → box; žíla zpět → PSU GND` (nespíná se!).
 

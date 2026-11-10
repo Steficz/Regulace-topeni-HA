@@ -1,7 +1,4 @@
-# Lovelace dashboard — VYTÁPĚNÍ (dark)
-# Vlozit jako "Manual" card do view, nebo pouzit jako whole dashboard yaml resource.
-# Predpoklada entity z ESPHome device auto-discovery (sensor.vyt_jX_*) +
-# switch.vyt_jX (GPIO) + number.vyt_jX_cilova_teplota.
+# AUTO-GENEROVANO scripts/gen-zone.py --lovelace
 title: Vytápění
 views:
   - title: Vytápění
@@ -9,13 +6,12 @@ views:
     icon: mdi:radiator
     cards:
       - type: markdown
-        content: "## Regulace 8 pokojů · centrála RPi3 · stav: pilot"
+        content: "## Regulace 12 pokojů · centrála RPi3 + GPIO (nebo ESP actor) · MVP pilot v běhu"
       - type: grid
-        columns: 2
+        columns: 3
         cards:
-          # --- karta pokoje (zkopirovat pro j2..j8) ---
           - type: entities
-            title: "J1 · Obývák"
+            title: "J1 · Muj pokoj"
             show_header_toggle: false
             entities:
               - entity: sensor.vyt_j1_teplota
@@ -26,23 +22,183 @@ views:
                 name: CO₂
               - entity: sensor.vyt_j1_vlhkost
                 name: Vlhkost
-              - type: custom:conditional
-                conditions: [{entity: switch.vyt_j1, state_on: true}]
-                card:
-                  type: markdown
-                  content: "🔥 ventil OTEVŘENO"
-              - type: custom:conditional
-                conditions: [{entity: switch.vyt_j1, state_on: false}]
-                card:
-                  type: markdown
-                  content: "✅ ventil ZAVŘENO"
-              - entity: sensor.vyt_j1_rssi
-                name: signál
-              - type: divider
               - entity: switch.vyt_j1
-                name: "Ruční override ventilu"
-          - type: markdown
-            content: |
-              **Režimy** (plány): Helpers → Schedule. Ráno 06:00 Comfort 21.5,
-              noc 22:30 Eco 19. Tlačítka-scény sem doplnime po pilotovi.
-              Pod 8 °C = mrazovka, nad 1400 ppm CO₂ = alerta "větrat".
+                name: "Ventil (ruční override)"
+              - entity: sensor.vyt_j1_rssi
+                name: Signál
+          - type: entities
+            title: "J2 · Hostovský"
+            show_header_toggle: false
+            entities:
+              - entity: sensor.vyt_j2_teplota
+                name: Teplota
+              - entity: number.vyt_j2_cilova_teplota
+                name: Cíl
+              - entity: sensor.vyt_j2_co2
+                name: CO₂
+              - entity: sensor.vyt_j2_vlhkost
+                name: Vlhkost
+              - entity: switch.vyt_j2
+                name: "Ventil (ruční override)"
+              - entity: sensor.vyt_j2_rssi
+                name: Signál
+          - type: entities
+            title: "J3 · Koupelna dole"
+            show_header_toggle: false
+            entities:
+              - entity: sensor.vyt_j3_teplota
+                name: Teplota
+              - entity: number.vyt_j3_cilova_teplota
+                name: Cíl
+              - entity: sensor.vyt_j3_co2
+                name: CO₂
+              - entity: sensor.vyt_j3_vlhkost
+                name: Vlhkost
+              - entity: switch.vyt_j3
+                name: "Ventil (ruční override)"
+              - entity: sensor.vyt_j3_rssi
+                name: Signál
+          - type: entities
+            title: "J4 · Kuchyně"
+            show_header_toggle: false
+            entities:
+              - entity: sensor.vyt_j4_teplota
+                name: Teplota
+              - entity: number.vyt_j4_cilova_teplota
+                name: Cíl
+              - entity: sensor.vyt_j4_co2
+                name: CO₂
+              - entity: sensor.vyt_j4_vlhkost
+                name: Vlhkost
+              - entity: switch.vyt_j4
+                name: "Ventil (ruční override)"
+              - entity: sensor.vyt_j4_rssi
+                name: Signál
+          - type: entities
+            title: "J5 · Obývák 2"
+            show_header_toggle: false
+            entities:
+              - entity: sensor.vyt_j5_teplota
+                name: Teplota
+              - entity: number.vyt_j5_cilova_teplota
+                name: Cíl
+              - entity: sensor.vyt_j5_co2
+                name: CO₂
+              - entity: sensor.vyt_j5_vlhkost
+                name: Vlhkost
+              - entity: switch.vyt_j5
+                name: "Ventil (ruční override)"
+              - entity: sensor.vyt_j5_rssi
+                name: Signál
+          - type: entities
+            title: "J6 · Předsíň"
+            show_header_toggle: false
+            entities:
+              - entity: sensor.vyt_j6_teplota
+                name: Teplota
+              - entity: number.vyt_j6_cilova_teplota
+                name: Cíl
+              - entity: sensor.vyt_j6_co2
+                name: CO₂
+              - entity: sensor.vyt_j6_vlhkost
+                name: Vlhkost
+              - entity: switch.vyt_j6
+                name: "Ventil (ruční override)"
+              - entity: sensor.vyt_j6_rssi
+                name: Signál
+          - type: entities
+            title: "J7 · Šatna dole"
+            show_header_toggle: false
+            entities:
+              - entity: sensor.vyt_j7_teplota
+                name: Teplota
+              - entity: number.vyt_j7_cilova_teplota
+                name: Cíl
+              - entity: sensor.vyt_j7_co2
+                name: CO₂
+              - entity: sensor.vyt_j7_vlhkost
+                name: Vlhkost
+              - entity: switch.vyt_j7
+                name: "Ventil (ruční override)"
+              - entity: sensor.vyt_j7_rssi
+                name: Signál
+          - type: entities
+            title: "J8 · Koupelna nahoře"
+            show_header_toggle: false
+            entities:
+              - entity: sensor.vyt_j8_teplota
+                name: Teplota
+              - entity: number.vyt_j8_cilova_teplota
+                name: Cíl
+              - entity: sensor.vyt_j8_co2
+                name: CO₂
+              - entity: sensor.vyt_j8_vlhkost
+                name: Vlhkost
+              - entity: switch.vyt_j8
+                name: "Ventil (ruční override)"
+              - entity: sensor.vyt_j8_rssi
+                name: Signál
+          - type: entities
+            title: "J9 · Ložnice nahoře"
+            show_header_toggle: false
+            entities:
+              - entity: sensor.vyt_j9_teplota
+                name: Teplota
+              - entity: number.vyt_j9_cilova_teplota
+                name: Cíl
+              - entity: sensor.vyt_j9_co2
+                name: CO₂
+              - entity: sensor.vyt_j9_vlhkost
+                name: Vlhkost
+              - entity: switch.vyt_j9
+                name: "Ventil (ruční override)"
+              - entity: sensor.vyt_j9_rssi
+                name: Signál
+          - type: entities
+            title: "J10 · Horní paluba"
+            show_header_toggle: false
+            entities:
+              - entity: sensor.vyt_j10_teplota
+                name: Teplota
+              - entity: number.vyt_j10_cilova_teplota
+                name: Cíl
+              - entity: sensor.vyt_j10_co2
+                name: CO₂
+              - entity: sensor.vyt_j10_vlhkost
+                name: Vlhkost
+              - entity: switch.vyt_j10
+                name: "Ventil (ruční override)"
+              - entity: sensor.vyt_j10_rssi
+                name: Signál
+          - type: entities
+            title: "J11 · Horní šatna"
+            show_header_toggle: false
+            entities:
+              - entity: sensor.vyt_j11_teplota
+                name: Teplota
+              - entity: number.vyt_j11_cilova_teplota
+                name: Cíl
+              - entity: sensor.vyt_j11_co2
+                name: CO₂
+              - entity: sensor.vyt_j11_vlhkost
+                name: Vlhkost
+              - entity: switch.vyt_j11
+                name: "Ventil (ruční override)"
+              - entity: sensor.vyt_j11_rssi
+                name: Signál
+          - type: entities
+            title: "J12 · Horní pokoj"
+            show_header_toggle: false
+            entities:
+              - entity: sensor.vyt_j12_teplota
+                name: Teplota
+              - entity: number.vyt_j12_cilova_teplota
+                name: Cíl
+              - entity: sensor.vyt_j12_co2
+                name: CO₂
+              - entity: sensor.vyt_j12_vlhkost
+                name: Vlhkost
+              - entity: switch.vyt_j12
+                name: "Ventil (ruční override)"
+              - entity: sensor.vyt_j12_rssi
+                name: Signál

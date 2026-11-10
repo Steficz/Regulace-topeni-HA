@@ -1,4 +1,5 @@
-# AUTO-GENEROVANO z scripts/gen-zone.py — ruka jen do zdrojoveho vzoru
+# AUTO-GENEROVANO z scripts/gen-zone.py — zdroj pravdy = ROOMS v tomto skriptu
+
 - alias: "Vyt J2: box zadava ventil"
   triggers:
     - trigger: mqtt
@@ -23,8 +24,8 @@
     - action: persistent_notification.create
       data:
         notification_id: vyt_offline_j2
-        title: "Vytápění J2 offline"
-        message: "Box J2 se 10 min neozývá — ventil vypnut. Zkontroluj napájení/Wi-Fi."
+        title: "Vytapeni J2 (Hostovský) offline"
+        message: "Box J2 se 10 min neoziva — ventil Hostovský vypnut. Zkontroluj napajeni/Wi-Fi."
 
 - alias: "Vyt J3: box zadava ventil"
   triggers:
@@ -50,8 +51,8 @@
     - action: persistent_notification.create
       data:
         notification_id: vyt_offline_j3
-        title: "Vytápění J3 offline"
-        message: "Box J3 se 10 min neozývá — ventil vypnut. Zkontroluj napájení/Wi-Fi."
+        title: "Vytapeni J3 (Koupelna dole) offline"
+        message: "Box J3 se 10 min neoziva — ventil Koupelna dole vypnut. Zkontroluj napajeni/Wi-Fi."
 
 - alias: "Vyt J4: box zadava ventil"
   triggers:
@@ -77,8 +78,8 @@
     - action: persistent_notification.create
       data:
         notification_id: vyt_offline_j4
-        title: "Vytápění J4 offline"
-        message: "Box J4 se 10 min neozývá — ventil vypnut. Zkontroluj napájení/Wi-Fi."
+        title: "Vytapeni J4 (Kuchyně) offline"
+        message: "Box J4 se 10 min neoziva — ventil Kuchyně vypnut. Zkontroluj napajeni/Wi-Fi."
 
 - alias: "Vyt J5: box zadava ventil"
   triggers:
@@ -104,8 +105,8 @@
     - action: persistent_notification.create
       data:
         notification_id: vyt_offline_j5
-        title: "Vytápění J5 offline"
-        message: "Box J5 se 10 min neozývá — ventil vypnut. Zkontroluj napájení/Wi-Fi."
+        title: "Vytapeni J5 (Obývák 2) offline"
+        message: "Box J5 se 10 min neoziva — ventil Obývák 2 vypnut. Zkontroluj napajeni/Wi-Fi."
 
 - alias: "Vyt J6: box zadava ventil"
   triggers:
@@ -131,8 +132,8 @@
     - action: persistent_notification.create
       data:
         notification_id: vyt_offline_j6
-        title: "Vytápění J6 offline"
-        message: "Box J6 se 10 min neozývá — ventil vypnut. Zkontroluj napájení/Wi-Fi."
+        title: "Vytapeni J6 (Předsíň) offline"
+        message: "Box J6 se 10 min neoziva — ventil Předsíň vypnut. Zkontroluj napajeni/Wi-Fi."
 
 - alias: "Vyt J7: box zadava ventil"
   triggers:
@@ -158,8 +159,8 @@
     - action: persistent_notification.create
       data:
         notification_id: vyt_offline_j7
-        title: "Vytápění J7 offline"
-        message: "Box J7 se 10 min neozývá — ventil vypnut. Zkontroluj napájení/Wi-Fi."
+        title: "Vytapeni J7 (Šatna dole) offline"
+        message: "Box J7 se 10 min neoziva — ventil Šatna dole vypnut. Zkontroluj napajeni/Wi-Fi."
 
 - alias: "Vyt J8: box zadava ventil"
   triggers:
@@ -185,5 +186,113 @@
     - action: persistent_notification.create
       data:
         notification_id: vyt_offline_j8
-        title: "Vytápění J8 offline"
-        message: "Box J8 se 10 min neozývá — ventil vypnut. Zkontroluj napájení/Wi-Fi."
+        title: "Vytapeni J8 (Koupelna nahoře) offline"
+        message: "Box J8 se 10 min neoziva — ventil Koupelna nahoře vypnut. Zkontroluj napajeni/Wi-Fi."
+
+- alias: "Vyt J9: box zadava ventil"
+  triggers:
+    - trigger: mqtt
+      topic: "vyt/j9/valve"
+  actions:
+    - choose:
+        - conditions: "{{ trigger.payload == 'ON' }}"
+          sequence: [{action: switch.turn_on, target: {entity_id: switch.vyt_j9}}]
+        - conditions: "{{ trigger.payload == 'OFF' }}"
+          sequence: [{action: switch.turn_off, target: {entity_id: switch.vyt_j9}}]
+  mode: queued
+
+- alias: "Vyt: TTL heartbeat J9"
+  triggers:
+    - trigger: state
+      entity_id: sensor.vyt_j9_teplota
+      to: "unavailable"
+      for: "00:10:00"
+  actions:
+    - action: switch.turn_off
+      target: {entity_id: switch.vyt_j9}
+    - action: persistent_notification.create
+      data:
+        notification_id: vyt_offline_j9
+        title: "Vytapeni J9 (Ložnice nahoře) offline"
+        message: "Box J9 se 10 min neoziva — ventil Ložnice nahoře vypnut. Zkontroluj napajeni/Wi-Fi."
+
+- alias: "Vyt J10: box zadava ventil"
+  triggers:
+    - trigger: mqtt
+      topic: "vyt/j10/valve"
+  actions:
+    - choose:
+        - conditions: "{{ trigger.payload == 'ON' }}"
+          sequence: [{action: switch.turn_on, target: {entity_id: switch.vyt_j10}}]
+        - conditions: "{{ trigger.payload == 'OFF' }}"
+          sequence: [{action: switch.turn_off, target: {entity_id: switch.vyt_j10}}]
+  mode: queued
+
+- alias: "Vyt: TTL heartbeat J10"
+  triggers:
+    - trigger: state
+      entity_id: sensor.vyt_j10_teplota
+      to: "unavailable"
+      for: "00:10:00"
+  actions:
+    - action: switch.turn_off
+      target: {entity_id: switch.vyt_j10}
+    - action: persistent_notification.create
+      data:
+        notification_id: vyt_offline_j10
+        title: "Vytapeni J10 (Horní paluba) offline"
+        message: "Box J10 se 10 min neoziva — ventil Horní paluba vypnut. Zkontroluj napajeni/Wi-Fi."
+
+- alias: "Vyt J11: box zadava ventil"
+  triggers:
+    - trigger: mqtt
+      topic: "vyt/j11/valve"
+  actions:
+    - choose:
+        - conditions: "{{ trigger.payload == 'ON' }}"
+          sequence: [{action: switch.turn_on, target: {entity_id: switch.vyt_j11}}]
+        - conditions: "{{ trigger.payload == 'OFF' }}"
+          sequence: [{action: switch.turn_off, target: {entity_id: switch.vyt_j11}}]
+  mode: queued
+
+- alias: "Vyt: TTL heartbeat J11"
+  triggers:
+    - trigger: state
+      entity_id: sensor.vyt_j11_teplota
+      to: "unavailable"
+      for: "00:10:00"
+  actions:
+    - action: switch.turn_off
+      target: {entity_id: switch.vyt_j11}
+    - action: persistent_notification.create
+      data:
+        notification_id: vyt_offline_j11
+        title: "Vytapeni J11 (Horní šatna) offline"
+        message: "Box J11 se 10 min neoziva — ventil Horní šatna vypnut. Zkontroluj napajeni/Wi-Fi."
+
+- alias: "Vyt J12: box zadava ventil"
+  triggers:
+    - trigger: mqtt
+      topic: "vyt/j12/valve"
+  actions:
+    - choose:
+        - conditions: "{{ trigger.payload == 'ON' }}"
+          sequence: [{action: switch.turn_on, target: {entity_id: switch.vyt_j12}}]
+        - conditions: "{{ trigger.payload == 'OFF' }}"
+          sequence: [{action: switch.turn_off, target: {entity_id: switch.vyt_j12}}]
+  mode: queued
+
+- alias: "Vyt: TTL heartbeat J12"
+  triggers:
+    - trigger: state
+      entity_id: sensor.vyt_j12_teplota
+      to: "unavailable"
+      for: "00:10:00"
+  actions:
+    - action: switch.turn_off
+      target: {entity_id: switch.vyt_j12}
+    - action: persistent_notification.create
+      data:
+        notification_id: vyt_offline_j12
+        title: "Vytapeni J12 (Horní pokoj) offline"
+        message: "Box J12 se 10 min neoziva — ventil Horní pokoj vypnut. Zkontroluj napajeni/Wi-Fi."
