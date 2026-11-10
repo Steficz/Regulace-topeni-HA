@@ -1,0 +1,40 @@
+services:
+  home-assistant:
+    image: ghcr.io/home-assistant/home-assistant:stable
+    container_name: homeassistant
+    network_mode: host
+    restart: unless-stopped
+    mem_limit: 480m
+    environment:
+      - TZ=Europe/Prague
+    volumes:
+      - ./ha-config:/config
+      - /etc/localtime:/etc/localtime:ro
+
+  mosquitto:
+    image: eclipse-mosquitto:2
+    container_name: mosquitto
+    restart: unless-stopped
+    mem_limit: 64m
+    ports:
+      - "1883:1883"
+    environment:
+      - TZ=Europe/Prague
+    volumes:
+      - ./mosquitto/config:/mosquitto/config
+      - ./mosquitto/data:/mosquitto/data
+      - ./mosquitto/log:/mosquitto/log
+
+  # ESPHome NENÍ trvalá služba — 1GB Pi nezvládne compile s HA+UniFi běžet.
+  # Spouštět na demand:  docker compose --profile compile run --rm esphome
+  # (nebo kompilovat na PC a na Pi posílat jen OTA binárky)
+  esphome:
+    image: esphome/esphome
+    container_name: esphome-compile
+    profiles: ["compile"]
+    network_mode: host
+    restart: "no"
+    volumes:
+      - ./esphome-config:/config
+    environment:
+      - TZ=Europe/Prague

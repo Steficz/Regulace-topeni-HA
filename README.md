@@ -81,6 +81,7 @@ ha/switch-gpio.md                     varianta A — GPIO switches v HA
 ha/automations-vyt.yaml               J1 vzor + boot-safe-off, mrazovka, CO2, scény
 ha/automations-vyt-z2-z12.yaml        generované zóny J2–J12
 ha/lovelace-vyt.yaml                  dashboard (generovaný)
+deploy/pi3/                            compose-stack pro HA+Mosquitto(+ESPHome on-demand) na Pi3
 scripts/gen-zone.py                   generator automations/dash (ROOMS)
 scripts/gen-central.py                generator aktéru (PINS)
 hardware/scad/                        parametrické krabice (OpenSCAD)

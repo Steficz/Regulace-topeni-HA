@@ -1,4 +1,6 @@
-# Rozdělení HW na lokalitě (topena + UniFi)
+# Rozdělení HW na lokalitě (topření + UniFi)
+
+> Stav 2026-11-10: **rozhodnuto — varianta 2 (vše na Pi3 v Dockeru)**, UniFi → Z2W jako plán B. Nasazení HA/Mosquitto zatím VYŘAZENO (bez čidel, nenasazovat); šablona `deploy/pi3/docker-compose.yml` — spustit až po doježdění HW. Jednorázové MQTT heslo z testu bylo zahozeno (smazáno z disku Pi, neplatí).
 
 Stav naměřeno 2026-11-10 (Pi3 = 100.86.188.1, RPi 3B 1GB, SSD 235G, uptime 16d):
 - UniFi Network Application: java 229 MB + mongod 76 MB ≈ **305 MB RSS**
