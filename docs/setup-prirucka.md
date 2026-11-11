@@ -42,6 +42,7 @@ Verze: 12 místností (mapa `scripts/gen-zone.py → ROOMS`). Dvě varianty cent
 - ⚠: GPIO 2/3 vyhrazeny I2C pro budoucí expanzi, 14/15 UART.
 
 ## 4. Centrála varianta B — ESP32 akter (DOPORUČUJI)
+> Pozn. k variantě B: akter odebírá `vyt/jX/valve` rovnou z brokeru, proto automations „box zadává ventil" (mapování MQTT→switch.vyt_jX) **u B nepoužívej** — buď je vynech, nebo přesměruj ruční override v dashboardu na entity akteru (`switch.vyt_central_jX_ventil`). TTL heartbeat automation zůstávají (přepínají switch, u B s přesměrováním).
 Proč B oproti A na RPi 3 + NVMe:
 | | A: RPi GPIO | **B: ESP32 akter** |
 |---|---|---|

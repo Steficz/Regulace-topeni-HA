@@ -16,7 +16,9 @@
 # ============================================================
 substitutions:
   device_name: vyt-j1
-  friendly_name: "Pokoj J1"
+  friendly_name: "Vyt J1"    # DŮLEŽÍ: HA discovery použije friendly_name jako prefix entit
+                             # (sensor.vyt_j1_teplota atd.) — automations to očekávají; lidské
+                             # jméno se ukazuje v názvu kachle/lovelace
   room: j1
 
 esphome:
@@ -25,6 +27,7 @@ esphome:
   on_boot:
     priority: 600
     then:
+      - lambda: 'id(t_change) = millis();'   # seed casovych zadrzi, prvni tick nesmi cekat 25 min
       - mqtt.publish:
           topic: vyt/${room}/heartbeat
           payload: "online"
@@ -40,10 +43,16 @@ ota:
 
 wifi:
   ssid: !secret wifi_ssid
-  password: !secret wifi_password          #[REDACTED]
+  password: !secret wifi_password   #[REDACTED]
   ap:
     ssid: "${device_name}-fallback"
-    password: "zmen-heslo-zde"             #[REDACTED]
+    password: "zmen-heslo-zde"      #[REDACTED]
+  domain: ".lan"
+
+esp32:
+  board: esp32-c6-devkitm-1
+  framework:
+    type: esp-idf        # C6: esp-idf je podporovana cesta; arduino core pro C6 je omezeny
 
 mqtt:
   broker: 192.168.1.10        # staticka IP Raspberry Pi s Mosquitto
@@ -54,16 +63,11 @@ mqtt:
     - topic: vyt/${room}/setpoint
       then:
         lambda: |-
-          float v;
-          if (x.parse_into<float>(v) && v > 5 && v < 30) {
+          float v = strtof(x.c_str(), nullptr);
+          if (v > 5.0f && v < 30.0f) {
             id(setpoint) = v;
             id(setpoint_num).publish_state(v);
           }
-
-esp32:
-  board: esp32-c6-devkitm-1
-  framework:
-    type: arduino
 
 i2c:
   - id: bus_a
@@ -150,21 +154,29 @@ interval:
         const uint32_t MIN_ON_MS = 25u * 60000u, MIN_OFF_MS = 20u * 60000u;
         bool cur = id(valve_on);
         bool want = cur;
+        bool freeze = (t < 8.0f);
         // prepnuti podle hysterze
         if (t < id(setpoint) - 0.3f) want = true;
         else if (t > id(setpoint) + 0.5f) want = false;
-        // mrazovka muze prepsout i min-doby, pri nizke T je ochrana prednost
-        if (t < 8.0f) want = true;
-        // respektuj minimalni doby (krome pripadu, kdy uz je stav spravne)
+        // mrazovka ma prioritu a SMI porusit minimalni doby (zde drive jen
+        // komentar lhal — vetveni zadrzovalo i ji)
+        if (freeze) want = true;
         if (want != cur) {
           uint32_t elapsed = now - id(t_change);
-          if (cur && elapsed < MIN_OFF_MS) return;   // jeste nesmim vypnout
-          if (!cur && elapsed < MIN_ON_MS) return;   // jeste nesmim zapnout
+          if (!freeze) {
+            if (cur  && elapsed < MIN_ON_MS)  return;  // ON teprve 25 min — nesmim vypnout
+            if (!cur && elapsed < MIN_OFF_MS) return;  // OFF teprve 20 min — nesmim zapnout
+          }
           id(valve_on) = want;
           id(t_change) = now;
           id(valve_req).publish_state(want);
           id(publish_valve).perform();
         }
+  - interval: 30s
+    then:
+      - mqtt.publish:
+          topic: vyt/${room}/heartbeat
+          payload: "online"
 
 script:
   - id: publish_valve
@@ -173,3 +185,4 @@ script:
           topic: vyt/${room}/valve
           payload: !lambda 'return id(valve_on) ? "ON" : "OFF";'
           retain: true
+
