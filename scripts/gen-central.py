@@ -18,7 +18,7 @@ print("""# ============================================================
 # ============================================================
 substitutions:
   device_name: vyt-central
-  friendly_name: "Centrála — akter ventilů"
+  friendly_name: "Vyt Central"    # prefix entit switch.vyt_central_jX_ventil
 
 esphome:
   name: ${device_name}
